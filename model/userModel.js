@@ -55,6 +55,10 @@ const UserSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   hashToken: String,
   expiresDate: Date,
+  active: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 UserSchema.pre("save", async function (next) {

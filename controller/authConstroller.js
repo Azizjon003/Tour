@@ -24,6 +24,15 @@ const responseFunc = (res, data, statusCode, token) => {
 const tekshirHashga = async (password, hash) => {
   return await bcrypt.compare(password, hash);
 };
+const OptionSort = function (options, permission) {
+  const option = {};
+  console.log(permission);
+  Object.keys(options).forEach((key) => {
+    if (permission.includes(key)) option[key] = options[key];
+  });
+
+  return option;
+};
 const signup = catchUser(async (req, res, next) => {
   //  1 sign up  qismi yani ma'lumotni bazaga saqlash
   const data = await User.create({
@@ -193,6 +202,21 @@ const updatePassword = catchUser(async (req, res, next) => {
   });
   responseFunc(res, undefined, 200, token);
 });
+
+const updateMe = catchUser(async (req, res, next) => {
+  const id = req.user._id;
+
+  const optionPermission = ["name", "email", "photo"];
+  const options = OptionSort(req.body, optionPermission);
+  const user = await User.findByIdAndUpdate(id, options, {
+    new: true,
+    runValidators: true,
+  });
+
+  responseFunc(res, user, 200);
+});
+
+const deleteUser = catchUser(async (req, res, next) => {});
 module.exports = {
   signup,
   login,
@@ -200,4 +224,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   updatePassword,
+  updateMe,
 };
