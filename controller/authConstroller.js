@@ -21,6 +21,9 @@ const responseFunc = (res, data, statusCode, token) => {
   });
 };
 
+const tekshirHashga = async (password, hash) => {
+  return await bcrypt.compare(password, hash);
+};
 const signup = catchUser(async (req, res, next) => {
   //  1 sign up  qismi yani ma'lumotni bazaga saqlash
   const data = await User.create({
@@ -56,10 +59,6 @@ const login = catchUser(async (req, res, next) => {
     return next(new AppError("user is not Found", 401));
   }
 
-  const tekshirHashga = async (password, hash) => {
-    return await bcrypt.compare(password, hash);
-  };
-
   // 2 pasworndni teskhisib olish agar to'g'ri bo'lsa biz userga JWT berish
   if (!tekshirHashga(password, data.password)) {
     return next(new AppError("Password is incorrect", 401));
@@ -71,11 +70,9 @@ const login = catchUser(async (req, res, next) => {
   responseFunc(res, undefined, 200, token);
 });
 
-const protect = async (req, res, next) => {
+const protect = catchUser(async (req, res, next) => {
   //1 tokenni tekshirish
   let token;
-
-  console.log(user.headers);
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -100,7 +97,7 @@ const protect = async (req, res, next) => {
   console.log(user);
   req.user = user;
   next();
-};
+});
 
 const forgotPassword = catchUser(async (req, res, next) => {
   const email = req.body.email;
@@ -108,7 +105,6 @@ const forgotPassword = catchUser(async (req, res, next) => {
     return next(new AppError("email is required", 400));
   }
   console.log("sfkbdss");
-  next();
   const user = await User.findOne({ email: email });
   console.log(user);
   if (!user) {
@@ -116,6 +112,7 @@ const forgotPassword = catchUser(async (req, res, next) => {
   }
 
   // token yaratish
+
   const resetToken = await user.resetToken();
   user.save({
     validateBeforeSave: false,
@@ -131,9 +128,9 @@ const forgotPassword = catchUser(async (req, res, next) => {
         "host"
       )}/api/v1/users/resetPassword/${resetToken}.This link expires 10 minutes after it was sent.</a>`,
   });
-  res.status("200").json({
-    status: "succes",
-    message: "send resetpassword email",
+  res.status(200).json({
+    status: "sucess",
+    message: "send email  reset token ",
   });
 });
 
@@ -173,8 +170,28 @@ const resetPassword = catchUser(async (req, res, next) => {
   res.status(202).json({
     status: "sucess",
     message: "Reset password sucessfull",
-    token,
+    token: newToken,
   });
+});
+
+const updatePassword = catchUser(async (req, res, next) => {
+  const currentpass = req.body.currentPassword;
+
+  const user = await User.findById(req.params.id).select("+password");
+
+  if (!tekshirHashga(currentpass, user.password)) {
+    return next(new AppError("current password is incorrect", 400));
+  }
+
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+
+  await user.save();
+
+  const token = await jwt.sign({ id: user._id }, process.env.SECRET, {
+    expiresIn: process.env.ExpiresIn,
+  });
+  responseFunc(res, undefined, 200, token);
 });
 module.exports = {
   signup,
@@ -182,4 +199,5 @@ module.exports = {
   protect,
   forgotPassword,
   resetPassword,
+  updatePassword,
 };

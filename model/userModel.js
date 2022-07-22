@@ -66,15 +66,23 @@ UserSchema.pre("save", async function (next) {
 });
 UserSchema.methods.resetToken = async function () {
   const resetToken = crypto.randomBytes(32).toString("hex");
+  console.log(`random token : ${resetToken}`);
   const hashToken = await crypto
     .createHash("sha256")
     .update(resetToken)
     .digest("hex");
 
   this.hashToken = hashToken;
+  console.log(`hash token : ${hashToken}`);
   this.expiresDate = Date.now() + 10 * 60 * 1000;
   return resetToken;
 };
+UserSchema.pre("save", function (next) {
+  if (!this.isModified(this.password) || this.IsNew) return next();
+  this.passwordChangeDate = Date.now() - 1000;
+  next();
+});
+
 const User = mongoose.model("Users", UserSchema);
 
 module.exports = User;
