@@ -11,6 +11,8 @@ const mail = require("../utility/mail");
 
 const bcrypt = require("bcryptjs");
 
+const crypto = require("crypto");
+
 const responseFunc = (res, data, statusCode, token) => {
   res.status(statusCode).json({
     status: "succes",
@@ -69,9 +71,11 @@ const login = catchUser(async (req, res, next) => {
   responseFunc(res, undefined, 200, token);
 });
 
-const protect = catchUser(async (req, res, next) => {
+const protect = async (req, res, next) => {
   //1 tokenni tekshirish
   let token;
+
+  console.log(user.headers);
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -93,9 +97,10 @@ const protect = catchUser(async (req, res, next) => {
     return next(new AppError("User is not found", 401));
   }
 
+  console.log(user);
   req.user = user;
   next();
-});
+};
 
 const forgotPassword = catchUser(async (req, res, next) => {
   const email = req.body.email;
@@ -103,6 +108,7 @@ const forgotPassword = catchUser(async (req, res, next) => {
     return next(new AppError("email is required", 400));
   }
   console.log("sfkbdss");
+  next();
   const user = await User.findOne({ email: email });
   console.log(user);
   if (!user) {
@@ -130,9 +136,50 @@ const forgotPassword = catchUser(async (req, res, next) => {
     message: "send resetpassword email",
   });
 });
+
+const resetPassword = catchUser(async (req, res, next) => {
+  const token = req.params.token;
+  if (!token) {
+    return next(new AppError("token not found", 400));
+  }
+  const hashToken = await crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    hashToken: hashToken,
+    expiresDate: {
+      $gt: Date.now(),
+    },
+  });
+
+  console.log(user);
+  if (!user) {
+    return next(new AppError("tokken or expires not", 400));
+  }
+
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.hashToken = undefined;
+  user.expiresIn = undefined;
+
+  await user.save();
+
+  const newToken = jwt.sign({ id: user._id }, process.env.SECRET, {
+    expiresIn: process.env.ExpiresIn,
+  });
+
+  res.status(202).json({
+    status: "sucess",
+    message: "Reset password sucessfull",
+    token,
+  });
+});
 module.exports = {
   signup,
   login,
   protect,
   forgotPassword,
+  resetPassword,
 };

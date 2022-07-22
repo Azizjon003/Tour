@@ -5,6 +5,7 @@ console.log(auth);
 Router.route("/signup").post(auth.signup);
 Router.route("/signin").post(auth.login);
 Router.route("/forgotpassword").post(auth.forgotPassword);
+Router.route("/resetpassword/:token").patch(auth.resetPassword);
 Router.route("/").get(obj.getAllUser).post(obj.addUser);
 Router.route("/:id")
   .get(obj.getOneUser)
