@@ -216,7 +216,21 @@ const updateMe = catchUser(async (req, res, next) => {
   responseFunc(res, user, 200);
 });
 
-const deleteUser = catchUser(async (req, res, next) => {});
+const deleteUser = catchUser(async (req, res, next) => {
+  console.log(req.user);
+  const deleteData = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      active: false,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  responseFunc(res, null, 204);
+});
 module.exports = {
   signup,
   login,
@@ -225,4 +239,5 @@ module.exports = {
   resetPassword,
   updatePassword,
   updateMe,
+  deleteUser,
 };

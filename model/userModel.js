@@ -57,10 +57,15 @@ const UserSchema = new mongoose.Schema({
   expiresDate: Date,
   active: {
     type: Boolean,
-    default: false,
+    default: true,
+    select: false,
   },
 });
 
+UserSchema.pre(/^find/, async function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
 UserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
