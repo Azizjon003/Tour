@@ -7,10 +7,12 @@ const errorHandler = require("../controller/errorHandler");
 const app = express();
 const rateLimit = require("express-rate-limit");
 const halmet = require("helmet");
-const dataSanitize = require("expres-mongo-sanitize");
-const xssClean = reqiure("xss-clean");
+// const dataSanitize =require("expres-mongo-sanitize");
+const xssClean = require("xss-clean");
 const AppError = require("../utility/apperror");
 const morgan = require("morgan");
+
+const path = require("path");
 const limitter = rateLimit({
   max: 1000,
   windowMs: 60 * 60 * 1000,
@@ -28,11 +30,17 @@ app.use(
   })
 );
 
-app.use(dataSanitize());
+app.set("view engine", "pug");
+
+app.set("views", path.join(__dirname, "../views"));
+// app.use(dataSanitize());
 
 app.use(xssClean());
-app.use(express.static(`${__dirname}/public`));
+app.use(express.static(path.join(__dirname, "../public")));
 
+app.use("/home", (req, res, next) => {
+  res.render("base");
+});
 app.use("/api/v1/tours", Router);
 app.use("/api/v1/users", userRouter);
 

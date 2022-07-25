@@ -52,6 +52,11 @@ const UserSchema = new mongoose.Schema({
       message: "password and password confirm must be the same",
     },
   },
+  role: {
+    type: String,
+    enum: ["user", "admin", "lead-guide", "guide"],
+    default: "user",
+  },
   passwordChangedAt: Date,
   hashToken: String,
   expiresDate: Date,

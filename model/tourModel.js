@@ -67,5 +67,8 @@ const Schema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+Schema.index("price"); // price bo'yicha tartiblangan holatda saqlanadi
+
 const Tours = mongoose.model("Tours", Schema);
 module.exports = Tours;

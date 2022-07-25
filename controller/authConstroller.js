@@ -231,6 +231,15 @@ const deleteUser = catchUser(async (req, res, next) => {
 
   responseFunc(res, null, 204);
 });
+const role = (roles) => {
+  return catchUser(async (req, res, next) => {
+    if (!role.include(user.role)) {
+      return next(new AppError("xato bu huquqga ega emassiz", 401));
+    }
+
+    next();
+  });
+};
 module.exports = {
   signup,
   login,
@@ -240,4 +249,5 @@ module.exports = {
   updatePassword,
   updateMe,
   deleteUser,
+  role,
 };
