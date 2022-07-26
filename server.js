@@ -4,12 +4,12 @@ process.on("uncaughtException", (err) => {
   console.log(`Name ${err.name}   Message : ${err.message}`);
   process.exit(1);
 });
-const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
 const app = require("./meadweare/app");
 
-mongoose.connect(process.env.DATABASE).then(() => {
-  console.log("DB connected");
-});
+// mongoose.connect(process.env.DATABASE).then(() => {
+//   console.log("DB connected");
+// });
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "127.0.0.1", () => {
