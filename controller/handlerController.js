@@ -14,8 +14,8 @@ const getAll = catchAsync(async (req, res, next, Model) => {
     .filter()
     .sort()
     .field()
-    .pagenation()
-    .explain(); //  qanday ishlashini ko'rish uchun
+    .pagenation();
+  // .explain(); //  qanday ishlashini ko'rish uchun
 
   data = await data.databaseQuery;
   if (!data) {

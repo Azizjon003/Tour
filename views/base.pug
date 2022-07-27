@@ -5,10 +5,13 @@ html(lang="en")
         link(rel="stylesheet", href="/css/style.css")
         link(rel="shortcut icon", href="/img/favicon.png", type="image/x-icon")
         title Natours | Exciting tours for adventurous people
+        script(link="https://unpkg.com/axios/dist/axios.min.js")
+        script(src="/js/login.js" defer)
     body    
         include __header
 
-        main.main
-            include __main
+      
+        block content
+
 
         include __footer
