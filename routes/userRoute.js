@@ -17,8 +17,8 @@ Router.route("/updateme").patch(auth.protect, auth.updateMe);
 Router.route("/deleteme").patch(auth.protect, auth.deleteUser);
 
 Router.route("/")
-  .get(auth.protect, auth.role(["admin", "lead-guide"]), obj.getAllUser)
-  .post(auth.protect, auth.role(["admin", "lead-guide"]), obj.addUser);
+  .get(auth.protect, obj.getAllUser)
+  .post(auth.protect, obj.addUser);
 
 Router.route("/:id")
   .get(auth.protect, obj.getOneUser)

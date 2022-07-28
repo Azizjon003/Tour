@@ -61,14 +61,56 @@ const Schema = new mongoose.Schema(
       body: String,
     },
     startDates: [Date],
+    startLocation: {
+      type: {
+        type: String,
+        default: "Point",
+        enum: ["Point"],
+      },
+      cordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          enum: ["Point"],
+          default: "Point",
+        },
+        cordinates: [Number],
+        day: Number,
+        description: String,
+      },
+    ],
+    guides: [
+      {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: "Users",
+      },
+    ],
   },
+
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
 );
 
-Schema.index("price"); // price bo'yicha tartiblangan holatda saqlanadi
+Schema.virtual("reviews", {
+  ref: "Reviews",
+  foreignField: "tour",
+  localField: "_id",
+});
+Schema.pre(/^find/, function (next) {
+  this.populate({
+    path: "guides",
+    select: "-__v -_id",
+  })
+  next();
+});
+
+// Schema.index("price"); // price bo'yicha tartiblangan holatda saqlanadi
 
 const Tours = mongoose.model("Tours", Schema);
 module.exports = Tours;

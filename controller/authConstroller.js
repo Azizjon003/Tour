@@ -82,6 +82,7 @@ const login = catchUser(async (req, res, next) => {
 const protect = catchUser(async (req, res, next) => {
   //1 tokenni tekshirish
   let token;
+  
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")

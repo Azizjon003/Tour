@@ -4,6 +4,7 @@ const Router = require("../routes/toursRoute");
 const userRouter = require("../routes/userRoute");
 const errorHandler = require("../controller/errorHandler");
 const viewRouter = require("../routes/viewRoutes");
+const reviewRouter = require("../routes/review");
 const app = express();
 const rateLimit = require("express-rate-limit");
 const halmet = require("helmet");
@@ -41,6 +42,7 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 app.use("/api/v1/tours", Router);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/reviews", reviewRouter);
 app.use("/", viewRouter);
 app.all("*", (req, res, next) => {
   next(new AppError("Not found", 404));

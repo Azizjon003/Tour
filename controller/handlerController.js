@@ -9,15 +9,15 @@ const responseFunc = (res, data, statusCode) => {
   });
 };
 
-const getAll = catchAsync(async (req, res, next, Model) => {
+const getAll = catchAsync(async (req, res, next, Model, option) => {
   let data = new FeatureApi(req.query, Model)
     .filter()
     .sort()
     .field()
     .pagenation();
-  // .explain(); //  qanday ishlashini ko'rish uchun
 
-  data = await data.databaseQuery;
+  data = await data.databaseQuery.populate("reviews");
+  // const data = await Model.find().populate(option);
   if (!data) {
     return next(new AppError("No data found", 404));
   }
@@ -26,7 +26,7 @@ const getAll = catchAsync(async (req, res, next, Model) => {
 });
 
 const getOne = catchAsync(async (req, res, next, Model) => {
-  const data = await Model.findById(req.params.id);
+  const data = await Model.findById(req.params.id).populate("reviews");
   if (!data) {
     return next(new AppError("No data found", 404));
   }
