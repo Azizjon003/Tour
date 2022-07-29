@@ -8,6 +8,7 @@ const reviewRouter = require("../routes/review");
 const app = express();
 const rateLimit = require("express-rate-limit");
 const halmet = require("helmet");
+const cookie = require("cookie-parser");
 // const dataSanitize =require("expres-mongo-sanitize");
 const xssClean = require("xss-clean");
 const AppError = require("../utility/apperror");
@@ -31,6 +32,8 @@ app.use(
     limit: "20kb",
   })
 );
+app.use(cookie());
+app.use(express.urlencoded({ limit: "10kb" }));
 
 app.set("view engine", "pug");
 

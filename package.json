@@ -2,6 +2,7 @@
   "dependencies": {
     "axios": "^0.27.2",
     "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "express-mongo-sanitize": "^2.2.0",
@@ -12,16 +13,18 @@
     "morgan": "^1.10.0",
     "nodemailer": "^6.7.7",
     "nodemon": "^2.0.19",
+    "parcel": "^2.6.2",
     "pug": "^3.0.2",
     "validator": "^13.7.0",
     "xss-clean": "^0.1.1"
   },
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "build-js": "parcel build public/js/index.js "
   },
   "name": "tours",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "public/js/bundle.js",
   "author": "",
   "license": "ISC",
   "repository": {

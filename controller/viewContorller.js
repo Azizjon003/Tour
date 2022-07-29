@@ -14,6 +14,9 @@ const getAllTour = catchUser(async (req, res, next) => {
 
 const getOneTour = catchUser(async (req, res, next) => {
   const data = await Tour.findById(req.params.id);
+  if (!data) {
+    return next(AppError("data not found", 401));
+  }
   res.render("tour", {
     tour: data,
   });

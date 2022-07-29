@@ -21,6 +21,14 @@ const responseFunc = (res, data, statusCode, token) => {
   });
 };
 
+const saveTokenCookie = (res, token, req) => {
+  // shu cookieni ishlashini sorimiz
+  res.cookie("jwt", token, {
+    maxAge: 10 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: req.protocol === "https" ? true : false,
+  });
+};
 const tekshirHashga = async (password, hash) => {
   return await bcrypt.compare(password, hash);
 };
@@ -76,18 +84,23 @@ const login = catchUser(async (req, res, next) => {
   const token = await jwt.sign({ id: data._id }, process.env.SECRET, {
     expiresIn: process.env.ExpiresIn,
   });
+  saveTokenCookie(res, token, req);
   responseFunc(res, undefined, 200, token);
 });
 
 const protect = catchUser(async (req, res, next) => {
   //1 tokenni tekshirish
   let token;
-  
+
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
     token = req.headers.authorization.split(" ")[1];
+  } else {
+    if (req.cookies.jwt) {
+      token = req.cookies.jwt;
+    }
   }
 
   console.log(token);
@@ -106,6 +119,7 @@ const protect = catchUser(async (req, res, next) => {
 
   console.log(user);
   req.user = user;
+  res.locals.user = user;
   next();
 });
 
@@ -241,6 +255,43 @@ const role = (roles) => {
     next();
   });
 };
+
+const isSignin = async (req, res, next) => {
+  let token;
+
+  if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+
+  if (!token || token == "logout") {
+    return next();
+  }
+  // tokenni tekshirish kerak
+  const id = await promisify(jwt.verify)(token, process.env.SECRET);
+  if (!id) {
+    return next();
+  }
+  console.log(id);
+  // user bazada bor yo'qligini tekshirib olish
+  const user = await User.findById(id.id);
+
+  if (!user) {
+    return next();
+  }
+
+  console.log(user);
+  res.locals.user = user;
+  return next();
+};
+const logout = (req, res, next) => {
+  console.log("logotga kirdi");
+  res.cookie("jwt", "logout", {
+    httpOnly: true,
+  });
+  res.status(200).json({
+    status: "success",
+  });
+};
 module.exports = {
   signup,
   login,
@@ -251,4 +302,6 @@ module.exports = {
   updateMe,
   deleteUser,
   role,
+  isSignin,
+  logout,
 };
