@@ -25,9 +25,12 @@ const getOneTour = catchUser(async (req, res, next) => {
 const login = catchUser(async (req, res, next) => {
   res.render("loginUser");
 });
-
+const accaunt = catchUser(async (req, res, next) => {
+  res.render("accaunt");
+});
 module.exports = {
   getAllTour,
   getOneTour,
   login,
+  accaunt,
 };

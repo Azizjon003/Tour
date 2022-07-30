@@ -8,9 +8,9 @@ Router.route("/signin").post(auth.login);
 
 Router.route("/forgotpassword").post(auth.forgotPassword);
 
-Router.route("/resetpassword/:token").patch(auth.resetPassword);
-
 Router.route("/updatepassword").patch(auth.protect, auth.updatePassword);
+
+Router.route("/resetpassword/:token").patch(auth.resetPassword);
 
 Router.route("/updateme").patch(auth.protect, auth.updateMe);
 

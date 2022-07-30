@@ -49,6 +49,7 @@ const signup = catchUser(async (req, res, next) => {
     photo: req.body.photo,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
+    role: req.body.role,
   });
 
   console.log(data);
@@ -70,14 +71,16 @@ const login = catchUser(async (req, res, next) => {
     return next(new AppError("Please provide email and password", 400));
   }
   const data = await User.findOne({ email }).select("+password");
-
+  console.log("asndas");
   console.log(data);
   if (!data) {
     return next(new AppError("user is not Found", 401));
   }
 
+  console.log(await tekshirHashga(password, data.password));
   // 2 pasworndni teskhisib olish agar to'g'ri bo'lsa biz userga JWT berish
-  if (!tekshirHashga(password, data.password)) {
+  if (!(await tekshirHashga(password, data.password))) {
+    console.log("sdnsd");
     return next(new AppError("Password is incorrect", 401));
   }
 
@@ -201,8 +204,9 @@ const resetPassword = catchUser(async (req, res, next) => {
 const updatePassword = catchUser(async (req, res, next) => {
   const currentpass = req.body.currentPassword;
 
-  const user = await User.findById(req.params.id).select("+password");
-
+  const user = await User.findById(req.user.id).select("+password");
+  console.log("asdas");
+  console.log(user);
   if (!tekshirHashga(currentpass, user.password)) {
     return next(new AppError("current password is incorrect", 400));
   }
@@ -215,6 +219,7 @@ const updatePassword = catchUser(async (req, res, next) => {
   const token = await jwt.sign({ id: user._id }, process.env.SECRET, {
     expiresIn: process.env.ExpiresIn,
   });
+
   responseFunc(res, undefined, 200, token);
 });
 
