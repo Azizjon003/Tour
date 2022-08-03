@@ -116,6 +116,7 @@ const protect = catchUser(async (req, res, next) => {
   // user bazada bor yo'qligini tekshirib olish
   const user = await User.findById(id.id);
 
+  console.log(!user);
   if (!user) {
     return next(new AppError("User is not found", 401));
   }

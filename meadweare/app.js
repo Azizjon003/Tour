@@ -5,6 +5,7 @@ const userRouter = require("../routes/userRoute");
 const errorHandler = require("../controller/errorHandler");
 const viewRouter = require("../routes/viewRoutes");
 const reviewRouter = require("../routes/review");
+const langRouter = require("../routes/langRoute");
 const app = express();
 const rateLimit = require("express-rate-limit");
 const halmet = require("helmet");
@@ -43,6 +44,7 @@ app.set("views", path.join(__dirname, "../views"));
 app.use(xssClean());
 app.use(express.static(path.join(__dirname, "../public")));
 
+app.use("/api/v1/lang", langRouter);
 app.use("/api/v1/tours", Router);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/reviews", reviewRouter);

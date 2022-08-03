@@ -16,7 +16,7 @@ const getAll = catchAsync(async (req, res, next, Model, option) => {
     .field()
     .pagenation();
 
-  data = await data.databaseQuery.populate("reviews");
+  data = await data.databaseQuery;
   // const data = await Model.find().populate(option);
   if (!data) {
     return next(new AppError("No data found", 404));
@@ -26,7 +26,7 @@ const getAll = catchAsync(async (req, res, next, Model, option) => {
 });
 
 const getOne = catchAsync(async (req, res, next, Model) => {
-  const data = await Model.findById(req.params.id).populate("reviews");
+  const data = await Model.findById(req.params.id);
   if (!data) {
     return next(new AppError("No data found", 404));
   }
