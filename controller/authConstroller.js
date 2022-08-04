@@ -76,9 +76,7 @@ const resizeImg = (req, res, next) => {
     return next();
   }
   const fileFormat = req.file.mimetype.split("/")[1];
-  console.log();
   req.file.filename = `user-${req.user.id}-${Date.now()}.${fileFormat}`;
-  console.log(req.file.filename);
   sharp(req.file.buffer)
     .resize(500, 500)
     .toFormat("jpeg")
@@ -152,7 +150,6 @@ const protect = catchUser(async (req, res, next) => {
     }
   }
 
-  console.log(token);
   // tokenni tekshirish kerak
   const id = await promisify(jwt.verify)(token, process.env.SECRET);
   if (!id) {
@@ -162,12 +159,15 @@ const protect = catchUser(async (req, res, next) => {
   // user bazada bor yo'qligini tekshirib olish
   const user = await User.findById(id.id);
 
+  console.log(user);
   console.log(!user);
   if (!user) {
     return next(new AppError("User is not found", 401));
   }
 
-  console.log(user);
+  if (id.ieat < user.passwordChangedAt.getTime() / 1000) {
+    return next(new AppError("jwt malformet", 401));
+  }
   req.user = user;
   res.locals.user = user;
   next();
@@ -260,28 +260,25 @@ const updatePassword = catchUser(async (req, res, next) => {
 
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;
-
+  user.passwordChangedAt = Date.now() - 1000;
   await user.save();
 
-  const token = await jwt.sign({ id: user._id }, process.env.SECRET, {
-    expiresIn: process.env.ExpiresIn,
+  res.cookie("jwt", "logout", {
+    httpOnly: true,
   });
-
-  saveTokenCookie(res, token, req);
-  responseFunc(res, undefined, 200, token);
+  responseFunc(res, undefined, 200);
 });
 
 const updateMe = catchUser(async (req, res, next) => {
   const id = req.user._id;
-  console.log("Body", req.body);
-  console.log("file", req.file);
   const optionPermission = ["name", "email", "photo"];
   let option = {};
-  option.name = req.body.name;
-  option.email = req.body.email;
-  option.photo = req.file.filename || "default.jpg";
+  option.name = req.body.name || req.user.name;
+  option.email = req.body.email || req.user.email;
+  option.photo = req.file?.filename || req.user.photo;
 
   const options = OptionSort(option, optionPermission);
+
   const user = await User.findByIdAndUpdate(id, options, {
     new: true,
     runValidators: true,
