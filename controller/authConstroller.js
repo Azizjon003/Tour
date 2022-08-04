@@ -12,6 +12,8 @@ const mail = require("../utility/mail");
 const bcrypt = require("bcryptjs");
 
 const crypto = require("crypto");
+const multer = require("multer");
+const sharp = require("sharp");
 
 const responseFunc = (res, data, statusCode, token) => {
   res.status(statusCode).json({
@@ -41,6 +43,49 @@ const OptionSort = function (options, permission) {
 
   return option;
 };
+
+// const multerStorage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "public/img/users/");
+//   },
+//   filename: (req, file, cb) => {
+//     // user-user_id-timestemp
+//     const fileFormat = file.mimetype.split("/")[1];
+//     const filename = `user-${req.user.id}-${Date.now()}.${fileFormat}`;
+//     cb(null, filename);
+//   },
+// });
+
+const multerStorage = multer.memoryStorage({});
+const filterImage = (req, file, cb) => {
+  console.log(file);
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true);
+  } else {
+    cb(new AppError("rasm faylini yuklang", 400), false);
+  }
+};
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: filterImage,
+});
+const uploadImg = upload.single("photo");
+
+const resizeImg = (req, res, next) => {
+  if (!req.file) {
+    return next();
+  }
+  const fileFormat = req.file.mimetype.split("/")[1];
+  console.log();
+  req.file.filename = `user-${req.user.id}-${Date.now()}.${fileFormat}`;
+  console.log(req.file.filename);
+  sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat("jpeg")
+    .toFile(`${__dirname}/../public/img/users/${req.file.filename}`);
+
+  next();
+};
 const signup = catchUser(async (req, res, next) => {
   //  1 sign up  qismi yani ma'lumotni bazaga saqlash
   const data = await User.create({
@@ -60,6 +105,7 @@ const signup = catchUser(async (req, res, next) => {
   const token = await jwt.sign({ id: data._id }, process.env.SECRET, {
     expiresIn: process.env.ExpiresIn,
   });
+
   responseFunc(res, data, 200, token);
 });
 
@@ -208,7 +254,7 @@ const updatePassword = catchUser(async (req, res, next) => {
   const user = await User.findById(req.user.id).select("+password");
   console.log("asdas");
   console.log(user);
-  if (!tekshirHashga(currentpass, user.password)) {
+  if (!(await tekshirHashga(currentpass, user.password))) {
     return next(new AppError("current password is incorrect", 400));
   }
 
@@ -221,14 +267,21 @@ const updatePassword = catchUser(async (req, res, next) => {
     expiresIn: process.env.ExpiresIn,
   });
 
+  saveTokenCookie(res, token, req);
   responseFunc(res, undefined, 200, token);
 });
 
 const updateMe = catchUser(async (req, res, next) => {
   const id = req.user._id;
-
+  console.log("Body", req.body);
+  console.log("file", req.file);
   const optionPermission = ["name", "email", "photo"];
-  const options = OptionSort(req.body, optionPermission);
+  let option = {};
+  option.name = req.body.name;
+  option.email = req.body.email;
+  option.photo = req.file.filename || "default.jpg";
+
+  const options = OptionSort(option, optionPermission);
   const user = await User.findByIdAndUpdate(id, options, {
     new: true,
     runValidators: true,
@@ -262,33 +315,33 @@ const role = (roles) => {
   });
 };
 
-const isSignin = async (req, res, next) => {
+const isSignin = catchUser(async (req, res, next) => {
   let token;
-
+  console.log(req.cookies);
   if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
-
-  if (!token || token == "logout") {
+  if (!req.cookies.jwt || req.cookies.jwt == "logout") {
     return next();
   }
+
+  console.log(token);
   // tokenni tekshirish kerak
   const id = await promisify(jwt.verify)(token, process.env.SECRET);
   if (!id) {
+    console.log("sana");
     return next();
   }
-  console.log(id);
   // user bazada bor yo'qligini tekshirib olish
+
   const user = await User.findById(id.id);
 
   if (!user) {
     return next();
   }
-
-  console.log(user);
   res.locals.user = user;
   return next();
-};
+});
 const logout = (req, res, next) => {
   console.log("logotga kirdi");
   res.cookie("jwt", "logout", {
@@ -310,4 +363,6 @@ module.exports = {
   role,
   isSignin,
   logout,
+  uploadImg,
+  resizeImg,
 };

@@ -1,6 +1,7 @@
 const Router = require("express").Router();
 const obj = require("../controller/userConstroller");
 const auth = require("../controller/authConstroller");
+
 console.log(auth);
 Router.route("/signup").post(auth.signup);
 
@@ -12,7 +13,12 @@ Router.route("/updatepassword").patch(auth.protect, auth.updatePassword);
 
 Router.route("/resetpassword/:token").patch(auth.resetPassword);
 
-Router.route("/updateme").patch(auth.protect, auth.updateMe);
+Router.route("/updateme").patch(
+  auth.protect,
+  auth.uploadImg,
+  auth.resizeImg,
+  auth.updateMe
+);
 
 Router.route("/deleteme").patch(auth.protect, auth.deleteUser);
 

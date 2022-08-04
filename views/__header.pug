@@ -12,7 +12,7 @@ header.header
         nav.nav.nav--user 
             if user
                 a.nav__el(href="/account")
-                    img.nav__user-img(src="/img/users/user-1.jpg" alt="User photo")
+                    img.nav__user-img(src=`img/users/${user.photo}`  alt="User photo")
                     span= user.name
                 button.nav__el.logout LOG OUT
             else        

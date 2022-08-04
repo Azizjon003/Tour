@@ -1,5 +1,6 @@
 const hand = require("./handlerController");
 const User = require("../model/userModel");
+const AppError = require("../utility/apperror");
 
 const getAllUser = (req, res, next) => {
   hand.getAll(req, res, next, User);

@@ -1,11 +1,9 @@
-async function update(name, email) {
+async function update(formData) {
   let ress = await axios({
     method: "PATCH",
     url: "http://localhost:8080/api/v1/users/updateme",
-    data: {
-      name,
-      email,
-    },
+    data: formData,
+    // Headers:{""}/''
   });
 
   console.log(ress);
@@ -23,7 +21,13 @@ document
     e.preventDefault();
     const name = document.querySelector(".name_input").value;
     const email = document.querySelector(".email_input").value;
-    await update(name, email);
+    const photo = document.querySelector("#photo").files[0];
+
+    let formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("photo", photo);
+    await update(formData);
   });
 
 async function passwordChange(currentPassword, password, newPassword) {
@@ -51,5 +55,6 @@ document
     const currentPassword = document.querySelector("#password-current").value;
     const password = document.querySelector("#password").value;
     const passwordConfirm = document.querySelector("#password-confirm").value;
+
     await passwordChange(currentPassword, password, passwordConfirm);
   });

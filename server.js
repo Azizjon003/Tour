@@ -1,9 +1,9 @@
 const dotenv = require("dotenv");
 dotenv.config({ path: "config.env" });
-process.on("uncaughtException", (err) => {
-  console.log(`Name ${err.name}   Message : ${err.message}`);
-  process.exit(1);
-});
+// process.on("uncaughtException", (err) => {
+//   console.log(`Name ${err.name}   Message : ${err.message}`);
+//   process.exit(1);
+// });
 const mongoose = require("mongoose");
 const app = require("./meadweare/app");
 
@@ -16,7 +16,7 @@ app.listen(PORT, "127.0.0.1", () => {
   console.log(`Listening port ${PORT}`);
 });
 
-process.on("unhandledRejection", (err) => {
-  console.log(`Name ${err.name}   Message : ${err.message}`);
-  process.exit(1);
-});
+// process.on("unhandledRejection", (err) => {
+//   console.log(`Name ${err.name}   Message : ${err.message}`);
+//   process.exit(1);
+// });
