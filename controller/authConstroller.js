@@ -103,6 +103,8 @@ const signup = catchUser(async (req, res, next) => {
   const token = await jwt.sign({ id: data._id }, process.env.SECRET, {
     expiresIn: process.env.ExpiresIn,
   });
+  const url = `localhost:8080/home`;
+  await new mail(data, url).sentWelcome();
 
   responseFunc(res, data, 200, token);
 });
@@ -165,9 +167,9 @@ const protect = catchUser(async (req, res, next) => {
     return next(new AppError("User is not found", 401));
   }
 
-  if (id.ieat < user.passwordChangedAt.getTime() / 1000) {
-    return next(new AppError("jwt malformet", 401));
-  }
+  // if (id.ieat < user.passwordChangedAt.getTime() / 1000) {
+  //   return next(new AppError("jwt malformet", 401));
+  // }
   req.user = user;
   res.locals.user = user;
   next();
